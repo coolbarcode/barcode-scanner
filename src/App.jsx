@@ -1,10 +1,15 @@
 import React from "react";
 import "./App.css";
-
-const apiKey = process.env.REACT_APP_API_KEY;
+import AirtableComponent from "./components/Airtable";
+import Header from "./components/Header/Header";
+import Main from "./components/Main/Main";
 
 function App() {
-  return <div className="App"></div>;
+  return (
+    <div className="App">
+      <Main />
+    </div>
+  );
 }
 
 export default App;

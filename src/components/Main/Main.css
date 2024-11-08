@@ -1,0 +1,32 @@
+.mainWrapper {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  grid-template-rows: repeat(5, 1fr);
+  grid-column-gap: 0px;
+  grid-row-gap: 0px;
+  height: 100vh;
+  width: 100vw;
+}
+
+header {
+  grid-area: 1 / 1 / 2 / 7;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #f5f5f5;
+  padding: 1rem 2rem;
+  background-color: var(--primary-color);
+  height: 100%;
+  width: 100%;
+  border: dotted 3px red;
+}
+
+section {
+  grid-area: 2 / 1 / 7 / 2;
+  border: dotted 3px blue;
+}
+
+main {
+  grid-area: 2 / 2 / 7 / 7;
+  border: dotted 3px green;
+}
