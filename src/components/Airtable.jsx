@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Scanner from "./Scanner";
 import Airtable from "airtable";
+import { db, analytics, app } from "./firebase/firebase";
 import * as XLSX from "xlsx";
 
 const baseId = process.env.REACT_APP_AIRTABLE_BASEID;
@@ -11,7 +12,7 @@ const base = new Airtable({ apiKey: airtableApiKey }).base(baseId);
 
 function AirtableComponent() {
   const [datum, setDatum] = useState(new Date().toLocaleDateString()); // Date for report
-  const [namnArray, setnamnArray] = useState([]); // Array to save unique names
+  const [namnArray, setNamnArray] = useState([]); // Array to save unique names
   const [listItems, setListItems] = useState([]); // Array to save all items
   const [scanned, setScanned] = useState(""); // Scanned barcode that updates namnArray
   const [currentTime, setCurrentTime] = useState(""); // Used for the scan time
@@ -30,14 +31,27 @@ function AirtableComponent() {
         isPersonal: record.get("isPersonal"),
         isVip: record.get("isVip"),
         time: currentTime,
+        TotalaÄtit: record.get("TotalaÄtit"),
       };
 
-      // Save name in namnArray and all in listItems
-      setnamnArray((prev) => [...prev, namn]);
+      // Update "TotalaÄtit" field in Airtable for the record
+      base("data").update(
+        record.id,
+        {
+          TotalaÄtit: (record.get("TotalaÄtit") || 0) + 1,
+        },
+        (err, updatedRecord) => {
+          if (err) {
+            console.error("Error updating TotalaÄtit:", err);
+            return;
+          }
+          console.log("Updated TotalaÄtit for", updatedRecord.fields.Namn);
+        }
+      );
+
+      // Save name in namnArray and add newItem to listItems
+      setNamnArray((prev) => [...prev, namn]);
       setListItems((prev) => [...prev, newItem]);
-    } else {
-      // Additional functionality if someone scans multiple times
-      return;
     }
   }
 
@@ -48,7 +62,6 @@ function AirtableComponent() {
 
   // Function to create a report table and download it
   const createReportTable = () => {
-    // Initialize an array to accumulate data
     const reportData = listItems.map((item) => ({
       Ankomst: item.time,
       Namn: item.namn,
@@ -57,27 +70,20 @@ function AirtableComponent() {
 
     console.log(reportData);
 
-    // Create the worksheet
     const ws = XLSX.utils.json_to_sheet(reportData);
-
-    // Create a new workbook and append the sheet
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
 
-    // Create the Excel file and download it
     XLSX.writeFile(wb, `report_${datum}.xlsx`);
   };
 
-  // Use a single daily interval to update date and run createReportTable
+  // Update the date every 24 hours
   useEffect(() => {
-    const dailyInterval = setInterval(() => {
-      updateDate();
-    }, 1000 * 60 * 60 * 24); // Update every 24 hours
-
-    return () => clearInterval(dailyInterval); // Cleanup interval when component unmounts
+    const dailyInterval = setInterval(updateDate, 1000 * 60 * 60 * 24);
+    return () => clearInterval(dailyInterval);
   }, []);
 
-  // Update time every second, displayed when someone scans
+  // Update the time every second
   useEffect(() => {
     const interval = setInterval(() => {
       const time = new Date().toLocaleTimeString([], {
@@ -88,7 +94,7 @@ function AirtableComponent() {
       setCurrentTime(time);
     }, 1000);
 
-    return () => clearInterval(interval); // Cleanup time interval
+    return () => clearInterval(interval);
   }, []);
 
   // Fetch data from Airtable and compare with scanned barcodes
@@ -96,7 +102,7 @@ function AirtableComponent() {
     if (!scanned) return;
 
     base("data")
-      .select({ fields: ["Id", "Namn", "isPersonal", "isVip"] })
+      .select({ fields: ["Id", "Namn", "isPersonal", "isVip", "TotalaÄtit"] })
       .eachPage(
         (records, fetchNextPage) => {
           records.forEach((record) => {
@@ -118,9 +124,8 @@ function AirtableComponent() {
           if (err) console.error(err);
         }
       );
-  }, [scanned]); // Runs whenever 'scanned' changes
+  }, [scanned]);
 
-  // Render table with all scanned items
   return (
     <div>
       <Scanner onScan={handleSubmit} />

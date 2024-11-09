@@ -1,7 +1,5 @@
 import React from "react";
 import "./App.css";
-import AirtableComponent from "./components/Airtable";
-import Header from "./components/Header/Header";
 import Main from "./components/Main/Main";
 
 function App() {
