@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import "./Main.css";
 import Header from "../Header/Header";
-import AirtableComponent from "../Airtable";
 import axios from "axios";
+import DataFetcher from "../Airtable";
 
 function Main() {
   const [data, setData] = useState(null);
@@ -21,7 +21,7 @@ function Main() {
     return (
       <div>
         Loading...
-        <AirtableComponent />
+        <DataFetcher />
       </div>
     );
   }
@@ -64,7 +64,7 @@ function Main() {
         </ul>
       </section>
       <main>
-        <AirtableComponent />
+        <DataFetcher />
       </main>
     </div>
   );
