@@ -8,7 +8,7 @@ function Main() {
   const [data, setData] = useState(null);
   useEffect(() => {
     axios
-      .get("http://192.168.198.178:1337/mat/weeks")
+      .get("https://ntifoodpeople.vercel.app/api/food/week")
       .then((response) => {
         setData(response.data);
       })

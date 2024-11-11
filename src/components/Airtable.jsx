@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Scanner from "./Scanner";
 import Airtable from "airtable";
-import { db, analytics, app } from "./firebase/firebase";
 import * as XLSX from "xlsx";
 
 const baseId = process.env.REACT_APP_AIRTABLE_BASEID;
