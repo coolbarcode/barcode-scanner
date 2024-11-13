@@ -1,8 +1,14 @@
 import React, { useState, useEffect, useCallback } from "react";
 import Scanner from "./Scanner";
 import * as XLSX from "xlsx";
+import Airtable from "airtable";
 
-// Optional: You can define styles here or use a CSS module
+// Initialize Airtable
+const base = new Airtable({
+  apiKey: process.env.REACT_APP_AIRTABLE_APIKEY,
+}).base(process.env.REACT_APP_AIRTABLE_BASEID);
+
+// Optional: Define styles here or use a CSS module
 const styles = {
   tableRow: (isPersonal) => ({
     color: isPersonal ? "#ab14b0" : "#000",
@@ -11,10 +17,11 @@ const styles = {
 
 function DataFetcher() {
   const [reportDate, setReportDate] = useState(new Date().toLocaleDateString());
-  const [userSet, setUserSet] = useState(new Set()); // To track unique usernames
+  const [userSet, setUserSet] = useState(new Set());
   const [listItems, setListItems] = useState([]);
   const [scanned, setScanned] = useState("");
   const [currentTime, setCurrentTime] = useState("");
+  const [scannedCache, setScannedCache] = useState({});
 
   // Handle scanned barcode
   const handleSubmit = useCallback((barcode) => {
@@ -29,7 +36,7 @@ function DataFetcher() {
       if (!userSet.has(username)) {
         const newItem = {
           username,
-          isPersonal: record.teacher || false, // Default to false if undefined
+          isPersonal: record.isPersonal || false,
           time: currentTime,
         };
 
@@ -70,30 +77,76 @@ function DataFetcher() {
   useEffect(() => {
     if (!scanned) return;
 
-    const fetchData = async () => {
+    if (scannedCache[scanned]) {
+      setListItems((prevList) =>
+        prevList.some(
+          (item) => item.username === scannedCache[scanned].username
+        )
+          ? prevList
+          : [scannedCache[scanned], ...prevList]
+      );
+      return;
+    }
+
+    const fetchRecord = async () => {
       try {
-        const response = await fetch(
-          `https://ntifoodpeople.vercel.app/api/users/${scanned}`
-        );
-        const data = await response.json();
+        const records = await base("data")
+          .select({
+            fields: ["scanId", "username", "teacher"],
+            filterByFormula: `{scanId} = '${scanned}'`,
+          })
+          .firstPage();
 
-        if (data.error) {
-          console.error("API Error:", data.error);
-          return;
-        }
+        if (records.length > 0) {
+          const record = records[0];
+          const newItem = {
+            username: record.get("username"),
+            teacher: record.get("teacher"),
+          };
 
-        if (Array.isArray(data) && data.length > 0) {
-          addItem(data[0]);
+          setScannedCache((prevCache) => ({
+            ...prevCache,
+            [scanned]: newItem,
+          }));
+          addItem(newItem);
         } else {
-          console.warn("No user data found for scanned barcode.");
+          console.log("ID not found in Airtable. Checking external API...");
+          const response = await fetch(
+            "https://ntifoodpeople.vercel.app/api/users"
+          );
+          const users = await response.json();
+
+          const user = users.find((u) => u.scanId === scanned);
+          if (user) {
+            const newItem = {
+              username: user.username,
+              teacher: user.teacher,
+            };
+
+            await base("data").create({
+              scanId: scanned,
+              username: user.username,
+              teacher: user.teacher,
+            });
+
+            setScannedCache((prevCache) => ({
+              ...prevCache,
+              [scanned]: newItem,
+            }));
+            addItem(newItem);
+          } else {
+            console.log("ID not found in external API either.");
+          }
         }
       } catch (error) {
-        console.error("Fetch Error:", error);
+        console.error("Fetch error:", error);
+      } finally {
+        setScanned("");
       }
     };
 
-    fetchData();
-  }, [scanned, addItem]);
+    fetchRecord();
+  }, [scanned, scannedCache, addItem]);
 
   // Create and download the report as an Excel file
   const createReportTable = useCallback(() => {
