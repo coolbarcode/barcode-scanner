@@ -36,7 +36,7 @@ function DataFetcher() {
       if (!userSet.has(username)) {
         const newItem = {
           username,
-          isPersonal: record.isPersonal || false,
+          isPersonal: record.teacher || false,
           time: currentTime,
         };
 
@@ -175,8 +175,8 @@ function DataFetcher() {
         </thead>
         <tbody>
           {listItems.map((item, index) => (
-            <tr key={index} style={styles.tableRow(item.isPersonal)}>
-              <td>{item.username}</td>
+            <tr key={index}>
+              <td style={styles.tableRow(item.isPersonal)}>{item.username}</td>
               <td>{item.time}</td>
             </tr>
           ))}
