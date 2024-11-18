@@ -37,24 +37,32 @@ function Main() {
               dangerouslySetInnerHTML={{ __html: data.items[0].description }}
             ></p>
           </li>
+          <br />
+          <hr />
           <li>
             <h1>Tisdag</h1>
             <p
               dangerouslySetInnerHTML={{ __html: data.items[1].description }}
             ></p>
           </li>
+          <br />
+          <hr />
           <li>
             <h1>Onsdag</h1>
             <p
               dangerouslySetInnerHTML={{ __html: data.items[2].description }}
             ></p>
           </li>
+          <br />
+          <hr />
           <li>
             <h1>Torsdag</h1>
             <p
               dangerouslySetInnerHTML={{ __html: data.items[3].description }}
             ></p>
           </li>
+          <br />
+          <hr />
           <li>
             <h1>Fredag</h1>
             <p

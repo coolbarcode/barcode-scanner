@@ -15,18 +15,49 @@ header {
   align-items: center;
   color: #f5f5f5;
   padding: 1rem 2rem;
-  background-color: var(--primary-color);
   height: 100%;
   width: 100%;
-  border: dotted 3px red;
+  border-bottom: solid 1px white;
 }
 
 section {
   grid-area: 2 / 1 / 7 / 2;
-  border: dotted 3px blue;
+  color: var(--text-color);
+  text-align: center;
 }
 
 main {
   grid-area: 2 / 2 / 7 / 7;
-  border: dotted 3px green;
+  border-left: solid 1px white;
+  z-index: 2;
+  background: var(--secondary-color);
+  color: var(--text-color);
+}
+
+table{
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  margin: 10px;
+  width: 50%;
+  font-size: 25px;
+}
+
+tr{
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  justify-content: flex-start;
+}
+
+td{
+  flex: 1;
+  text-align: center;
+  padding: 10px;
+}
+
+th{
+  flex: 1;
+  text-align: center;
+  padding: 10px;
 }

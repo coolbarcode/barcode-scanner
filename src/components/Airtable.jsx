@@ -11,7 +11,7 @@ const base = new Airtable({
 // Optional: Define styles here or use a CSS module
 const styles = {
   tableRow: (isPersonal) => ({
-    color: isPersonal ? "#ab14b0" : "#000",
+    color: isPersonal ? "#0F0" : "#white",
   }),
 };
 
@@ -182,7 +182,6 @@ function DataFetcher() {
           ))}
         </tbody>
       </table>
-      <button onClick={createReportTable}>Send Report</button>
     </div>
   );
 }
