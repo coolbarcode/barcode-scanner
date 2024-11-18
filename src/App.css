@@ -4,8 +4,13 @@
   box-sizing: border-box;
 }
 
+.App{
+  background: var(--primary-color);
+}
 
 
 :root {
-  --primary-color: #780180;
+  --primary-color: linear-gradient(34deg, #4B0082 1%, #B1068C 50%, #4B0082 99%);
+  --secondary-color: #444444;
+  --text-color: white;
 }
